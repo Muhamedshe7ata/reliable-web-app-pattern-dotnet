@@ -27,4 +27,4 @@ END
 echo "Running SQL:"
 echo "$sql"
 
- sqlcmd -S "${SqlServerName}.database.windows.net" -d "$SqlDatabaseName" -G -Q "$sql"
+sqlcmd -S "${SqlServerName}.database.windows.net" -d "$SqlDatabaseName" -G -Q "$sql"
