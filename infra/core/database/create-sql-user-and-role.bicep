@@ -57,7 +57,7 @@ resource createSqlUserAndRole 'Microsoft.Resources/deploymentScripts@2020-10-01'
     }
     properties: {
       forceUpdateTag: uniqueScriptId
-      azPowerShellVersion: '7.4'
+      
       retentionInterval: 'PT1H'
       cleanupPreference: 'OnSuccess' // No need to keep around any background resources if succeeded
       arguments: join(
@@ -70,7 +70,7 @@ resource createSqlUserAndRole 'Microsoft.Resources/deploymentScripts@2020-10-01'
         ],
         ' '
       )
-      scriptContent: loadTextContent('./scripts/create-sql-user-and-role.ps1')
+      scriptContent: loadTextContent('./scripts/create-sql-user-and-role.sh')
     }
   }
 ]
