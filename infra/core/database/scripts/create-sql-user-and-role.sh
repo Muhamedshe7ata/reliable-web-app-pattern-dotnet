@@ -27,4 +27,4 @@ END
 echo "Running SQL:"
 echo "$sql"
 
-az sql db query -s "$SqlServerName" -n "$SqlDatabaseName" --query-text "$sql"
+az sql db execute -s "$SqlServerName" -d "$SqlDatabaseName" --query "$sql"
