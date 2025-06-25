@@ -29,27 +29,9 @@ Param(
     [string] $DatabaseRole
 )
 
-function Resolve-Module($moduleName) {
-    # If module is imported; say that and do nothing
-    if (Get-Module | Where-Object { $_.Name -eq $moduleName }) {
-        Write-Debug "Module $moduleName is already imported"
-    } elseif (Get-Module -ListAvailable | Where-Object { $_.Name -eq $moduleName }) {
-        Import-Module $moduleName
-    } elseif (Find-Module -Name $moduleName | Where-Object { $_.Name -eq $moduleName }) {
-        Install-Module $moduleName -Force -Scope CurrentUser
-        Import-Module $moduleName
-    } else {
-        Write-Error "Module $moduleName not found"
-        [Environment]::exit(1)
-    }
-}
-
 ###
 ### MAIN SCRIPT
 ###
-Resolve-Module -moduleName Az.Resources
-Resolve-Module -moduleName SqlServer
-
 $sql = @"
 DECLARE @username nvarchar(max) = N'$($DisplayName)';
 DECLARE @clientId uniqueidentifier = '$($ObjectId)';
@@ -65,4 +47,9 @@ END
 Write-Output "`nSQL:`n$($sql)`n`n"
 
 $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net/).Token
-Invoke-SqlCmd -ServerInstance "$SqlServerName.database.windows.net" -Database $SqlDatabaseName -AccessToken $token -Query $sql -ErrorAction 'Stop'
+
+# Save SQL to a file for sqlcmd
+$sql | Out-File -FilePath temp.sql -Encoding utf8
+
+# Run the SQL using sqlcmd and Azure AD access token
+sqlcmd -S "$SqlServerName.database.windows.net" -d $SqlDatabaseName -G -U "AzureADUser" -P $token -i temp.sql
