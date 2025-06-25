@@ -48,8 +48,5 @@ Write-Output "`nSQL:`n$($sql)`n`n"
 
 $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net/).Token
 
-# Save SQL to a file for sqlcmd
-$sql | Out-File -FilePath temp.sql -Encoding utf8
-
-# Run the SQL using sqlcmd and Azure AD access token
-sqlcmd -S "$SqlServerName.database.windows.net" -d $SqlDatabaseName -G -U "AzureADUser" -P $token -i temp.sql
+# Run the SQL using Azure CLI (az sql db query)
+az sql db query -s $SqlServerName -n $SqlDatabaseName --query-text "$sql"
