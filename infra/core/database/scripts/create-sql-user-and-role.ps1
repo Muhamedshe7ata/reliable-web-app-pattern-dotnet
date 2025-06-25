@@ -46,7 +46,7 @@ END
 
 Write-Output "`nSQL:`n$($sql)`n`n"
 
-$token = (Get-AzAccessToken -ResourceUrl https://database.windows.net/).Token
+# $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net/).Token
 
 # Run the SQL using Azure CLI (az sql db query)
 az sql db query -s $SqlServerName -n $SqlDatabaseName --query-text "$sql"
