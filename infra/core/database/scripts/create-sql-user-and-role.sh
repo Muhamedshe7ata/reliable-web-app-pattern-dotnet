@@ -1,52 +1,30 @@
-#Requires -Version 7.0
+#!/bin/bash
+set -e
 
-<#
-.SYNOPSIS
-    Creates a SQL user and assigns the user account to one or more roles.
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -SqlServerName) SqlServerName="$2"; shift ;;
+    -SqlDatabaseName) SqlDatabaseName="$2"; shift ;;
+    -ObjectId) ObjectId="$2"; shift ;;
+    -DisplayName) DisplayName="$2"; shift ;;
+    -DatabaseRole) DatabaseRole="$2"; shift ;;
+  esac
+  shift
+done
 
-.DESCRIPTION
-    During an application deployment, the managed identity (and potentially the developer identity)
-    must be added to the SQL database as a user and assigned to one or more roles.  This script
-    does exactly that using the owner managed identity.
-
-.PARAMETER SqlServerName
-    The name of the SQL Server resource
-.PARAMETER SqlDatabaseName
-    The name of the SQL Database resource
-.PARAMETER ObjectId
-    The Object (Principal) ID of the user to be added.
-.PARAMETER DisplayName
-    The Object (Principal) display name of the user to be added.
-.PARAMETER DatabaseRole
-    The database role that needs to be assigned to the user.
-#>
-
-Param(
-    [string] $SqlServerName,
-    [string] $SqlDatabaseName,
-    [string] $ObjectId,
-    [string] $DisplayName,
-    [string] $DatabaseRole
-)
-
-###
-### MAIN SCRIPT
-###
-$sql = @"
-DECLARE @username nvarchar(max) = N'$($DisplayName)';
-DECLARE @clientId uniqueidentifier = '$($ObjectId)';
+sql="
+DECLARE @username nvarchar(max) = N'$DisplayName';
+DECLARE @clientId uniqueidentifier = '$ObjectId';
 DECLARE @sid NVARCHAR(max) = CONVERT(VARCHAR(max), CONVERT(VARBINARY(16), @clientId), 1);
 DECLARE @cmd NVARCHAR(max) = N'CREATE USER [' + @username + '] WITH SID = ' + @sid + ', TYPE = E;';
 IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = @username)
 BEGIN
     EXEC(@cmd)
-    EXEC sp_addrolemember '$($DatabaseRole)', @username;
+    EXEC sp_addrolemember '$DatabaseRole', @username;
 END
-"@
+"
 
-Write-Output "`nSQL:`n$($sql)`n`n"
+echo "Running SQL:"
+echo "$sql"
 
-# $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net/).Token
-
-# Run the SQL using Azure CLI (az sql db query)
-az sql db query -s $SqlServerName -n $SqlDatabaseName --query-text "$sql"
+az sql db query -s "$SqlServerName" -n "$SqlDatabaseName" --query-text "$sql"
