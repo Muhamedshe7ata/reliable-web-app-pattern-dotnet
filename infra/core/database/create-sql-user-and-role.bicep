@@ -48,7 +48,7 @@ resource createSqlUserAndRole 'Microsoft.Resources/deploymentScripts@2020-10-01'
     name: 'sqlUserRole-${guid(principalId, databaseRole, sqlServerName, sqlDatabaseName)}'
     location: location
     tags: tags
-    kind: 'AzurePowerShell'
+    kind: 'AzureCLI'
     identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
