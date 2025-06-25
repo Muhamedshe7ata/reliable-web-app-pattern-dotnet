@@ -26,5 +26,9 @@ END
 
 echo "Running SQL:"
 echo "$sql"
-
+if ! command -v sqlcmd &> /dev/null; then
+  echo "sqlcmd not found, installing..."
+  apt-get update && ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+  export PATH="$PATH:/opt/mssql-tools/bin"
+fi
 sqlcmd -S "${SqlServerName}.database.windows.net" -d "$SqlDatabaseName" -G -Q "$sql"
